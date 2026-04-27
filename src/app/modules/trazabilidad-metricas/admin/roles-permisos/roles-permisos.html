@@ -1,0 +1,113 @@
+<div class="max-w-6xl mx-auto animate-in">
+    <!-- Header Profesional -->
+    <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+            <span class="w-8 h-[2px] bg-blue-600"></span>
+            <span class="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em]">Administración Central</span>
+        </div>
+        <h1 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Matriz de <span class="text-blue-600 underline decoration-4 decoration-blue-100 underline-offset-8">Permisos</span></h1>
+      </div>
+      
+      <!-- Leyenda Minimalista -->
+      <div class="flex gap-1 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
+        <div *ngFor="let rol of roles" 
+             class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all"
+             [ngClass]="{
+               'bg-white shadow-sm border border-slate-200': rol === 'super_admin'
+             }">
+            <div class="w-1.5 h-1.5 rounded-full" 
+                 [ngClass]="{
+                   'bg-blue-500': rol === 'cliente', 
+                   'bg-amber-500': rol === 'admin_taller', 
+                   'bg-green-500': rol === 'tecnico',
+                   'bg-slate-900': rol === 'super_admin'
+                 }"></div>
+            <span class="text-[9px] font-black text-slate-600 uppercase tracking-widest">{{rol.replace('_', ' ')}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATRIZ POR MÓDULOS -->
+    <div class="space-y-4">
+        <div *ngFor="let mod of modulos" class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden transition-all">
+            <!-- Cabecera del Módulo -->
+            <div (click)="toggleModulo(mod)" 
+                 class="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-6">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center transition-all border border-slate-100"
+                         [ngClass]="moduloExpandido === mod ? 'bg-slate-900 text-white' : 'bg-white text-slate-400'">
+                        <i class="bi" [ngClass]="moduloExpandido === mod ? 'bi-folder2-open' : 'bi-folder-fill'"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest">{{ mod }}</h2>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{ getCasosUsoPorModulo(mod).length }} Definiciones</span>
+                    </div>
+                </div>
+                <div class="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center transition-transform duration-300"
+                     [style.transform]="moduloExpandido === mod ? 'rotate(180deg)' : 'rotate(0deg)'">
+                    <i class="bi bi-chevron-down text-slate-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Tabla de Permisos (Sin sombras bugeadas) -->
+            <div *ngIf="moduloExpandido === mod" class="border-t border-slate-100 animate-in">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50/50">
+                            <tr>
+                                <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/4">Caso de Uso</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/4">Acción / Función</th>
+                                <th *ngFor="let rol of roles" class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
+                                    {{ rol.replace('admin_', '').replace('super_', '') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <ng-container *ngFor="let cu of getCasosUsoPorModulo(mod)">
+                                <tr *ngFor="let p of getPermisosPorCU(mod, cu); let first = first" 
+                                    class="hover:bg-blue-50/20 transition-colors">
+                                    
+                                    <td *ngIf="first" [attr.rowspan]="getPermisosPorCU(mod, cu).length" 
+                                        class="px-8 py-4 align-top border-r border-slate-50 bg-slate-50/20">
+                                        <div class="font-black text-slate-800 text-[10px] uppercase tracking-tighter leading-tight">{{ cu }}</div>
+                                    </td>
+
+                                    <td class="px-8 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                            <span class="text-xs font-bold text-slate-600 uppercase tracking-tight">{{ p.accion }}</span>
+                                        </div>
+                                    </td>
+
+                                    <td *ngFor="let rol of roles" class="px-4 py-4 text-center">
+                                        <label class="relative inline-flex items-center cursor-pointer group">
+                                            <input type="checkbox" [checked]="p[rol]" (change)="toggle(rol, p.id)" class="sr-only peer">
+                                            <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2.5px] after:start-[2.5px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer de Seguridad -->
+    <div class="mt-12 p-8 bg-slate-900 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center gap-6">
+        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-600/20">
+            <i class="bi bi-shield-lock-fill text-2xl"></i>
+        </div>
+        <div class="text-center md:text-left flex-grow">
+            <h4 class="text-sm font-black uppercase tracking-[0.2em] mb-1">Control de Integridad</h4>
+            <p class="text-xs text-slate-400 font-medium italic">
+                Cualquier cambio en esta matriz impacta globalmente la seguridad del sistema y la visibilidad de los módulos.
+            </p>
+        </div>
+        <div class="px-6 py-3 bg-white/10 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest">
+            Audit Log: On
+        </div>
+    </div>
+</div>

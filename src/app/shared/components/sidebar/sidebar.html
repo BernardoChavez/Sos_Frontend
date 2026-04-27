@@ -1,0 +1,147 @@
+<div class="sidebar">
+    <div class="logo-section">
+      <div class="bg-blue-600 p-2 rounded-lg text-white">
+        <i class="bi bi-shield-check text-xl"></i>
+      </div>
+      <h4 class="mb-0">SOS AUTO</h4>
+    </div>
+  
+    <nav class="nav-menu">
+      <div class="px-4 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">General</div>
+      
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+        <i class="bi bi-grid"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <a routerLink="/dashboard/notificaciones" routerLinkActive="active" class="nav-link">
+        <i class="bi bi-bell"></i>
+        <span>Notificaciones</span>
+      </a>
+  
+      <!-- SECCIÓN CLIENTE (Sistemas y Vehículos) -->
+      <div class="px-4 mt-6 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest" *ngIf="authService.currentUser?.rol === 'cliente' || authService.currentUser?.rol === 'super_admin'">
+        Módulo Cliente
+      </div>
+      
+      <li class="list-none" *ngIf="authService.hasPermission('usuarios.vehiculos.ver')">
+        <a routerLink="/dashboard/cliente/vehiculos" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-car-front"></i>
+          <span>Mis Vehículos</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.hasPermission('emergencias.solicitar')">
+        <a routerLink="/dashboard/cliente/solicitar-ayuda" routerLinkActive="active" class="nav-link text-red-500 font-bold hover:bg-red-50">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span>SOLICITAR AYUDA</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'cliente' || authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/cliente/historial" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-clock-history"></i>
+          <span>Historial Asistencias</span>
+        </a>
+      </li>
+
+      <!-- SECCIÓN TALLER / OPERACIONES -->
+      <div class="px-4 mt-6 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest" *ngIf="authService.currentUser?.rol === 'admin_taller' || authService.currentUser?.rol === 'tecnico' || authService.currentUser?.rol === 'super_admin'">
+        Operaciones Taller
+      </div>
+
+      <li class="list-none" *ngIf="authService.hasPermission('taller.despacho.ver')">
+        <a routerLink="/dashboard/taller/despacho" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-broadcast"></i>
+          <span>Despacho IA</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'tecnico' || authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/tecnico/mis-trabajos" routerLinkActive="active" class="nav-link bg-blue-50/50 text-blue-700 font-bold">
+        <i class="bi bi-briefcase-fill"></i>
+        <span>Trabajos Activos</span>
+      </a>
+
+      <a routerLink="/dashboard/tecnico/historial" routerLinkActive="active" class="nav-link">
+        <i class="bi bi-clock-history"></i>
+        <span>Mi Historial</span>
+      </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'admin_taller' || authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/taller/tecnicos" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-wrench-adjustable"></i>
+          <span>Cuerpo Técnico</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'admin_taller' || authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/taller/configuracion" routerLinkActive="active" class="nav-link">
+        <i class="bi bi-gear-fill"></i>
+        <span>Configurar Taller</span>
+      </a>
+
+      <a routerLink="/dashboard/taller/historial" routerLinkActive="active" class="nav-link">
+        <i class="bi bi-journal-text"></i>
+        <span>Historial Taller</span>
+      </a>
+      </li>
+
+      <!-- SECCIÓN ADMINISTRACIÓN GLOBAL -->
+      <div class="px-4 mt-6 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest" *ngIf="authService.currentUser?.rol === 'super_admin'">
+        Administración Global
+      </div>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/admin/talleres" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-building"></i>
+          <span>Gestión de Talleres</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/admin/usuarios" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-people"></i>
+          <span>Gestión de Usuarios</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/admin/roles-permisos" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-shield-lock"></i>
+          <span>Roles y Permisos</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/admin/auditoria" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-journal-text"></i>
+          <span>Bitácora del Sistema</span>
+        </a>
+      </li>
+
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin' || authService.currentUser?.rol === 'admin_taller'">
+        <a routerLink="/dashboard/admin/resenas" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-star-half"></i>
+          <span>Reputación y Reseñas</span>
+        </a>
+      </li>
+
+
+      <div class="px-4 mt-6 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cuenta</div>
+      <li class="list-none">
+        <a routerLink="/dashboard/perfil" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-person-circle"></i>
+          <span>Mi Perfil</span>
+        </a>
+      </li>
+    </nav>
+  
+    <div class="sidebar-footer">
+      <button (click)="authService.logout()" class="btn-logout">
+        <i class="bi bi-box-arrow-left"></i>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+</div>

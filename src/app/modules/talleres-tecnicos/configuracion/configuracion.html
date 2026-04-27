@@ -1,0 +1,113 @@
+<div class="animate-in" *ngIf="!loading">
+    <div class="mb-8">
+        <h1 class="text-2xl font-extrabold text-slate-800">Parámetros Operativos</h1>
+        <p class="text-slate-500 font-medium">Configuración de disponibilidad y cobertura geográfica</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Columna de Datos y Horarios -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- DATOS GENERALES -->
+            <div class="sx-card">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-blue-600 p-2.5 rounded-lg text-white">
+                        <i class="bi bi-info-circle-fill text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 mb-0">Información General</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="form-label">Nombre Comercial del Taller</label>
+                        <input type="text" [(ngModel)]="taller.nombre" class="form-control" placeholder="Ej: Taller Mecánico SOS">
+                    </div>
+                    <div>
+                        <label class="form-label">Teléfono de Contacto</label>
+                        <input type="text" [(ngModel)]="taller.telefono" class="form-control" placeholder="+591 7XXXXXXX">
+                    </div>
+                    <div>
+                        <label class="form-label">Especialidad Principal</label>
+                        <input type="text" [(ngModel)]="taller.especialidad" class="form-control" placeholder="Ej: Mecánica Integral">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="form-label">Dirección Física</label>
+                        <textarea [(ngModel)]="taller.direccion" class="form-control" rows="2" placeholder="Calle, Avenida, Zona..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sx-card">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-blue-600 p-2.5 rounded-lg text-white">
+                        <i class="bi bi-clock-history text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 mb-0">Horarios de Operación</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                    <div *ngFor="let dia of diasSemana" class="flex flex-col">
+                        <label class="form-label mb-1 text-xs font-bold text-slate-600">{{dia}}</label>
+                        <input type="text" [(ngModel)]="taller.horarios_atencion[dia]" 
+                               class="form-control h-11" placeholder="Ej: 08:00 - 18:00">
+                        <span class="text-[9px] text-slate-400 mt-1">Usa formato HH:MM - HH:MM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sx-card">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="bg-green-600 p-2.5 rounded-lg text-white">
+                        <i class="bi bi-geo-alt-fill text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 mb-0">Ubicación Geográfica (GPS)</h3>
+                </div>
+                
+                <div class="bg-slate-50 border border-slate-100 rounded-xl p-8 flex flex-col items-center text-center mb-6">
+                    <i class="bi bi-geo-fill text-blue-500 text-5xl mb-4 animate-pulse" *ngIf="taller.latitud && taller.longitud"></i>
+                    <i class="bi bi-geo text-slate-300 text-5xl mb-4" *ngIf="!taller.latitud || !taller.longitud"></i>
+                    
+                    <p class="text-slate-800 font-black text-lg" *ngIf="taller.latitud && taller.longitud">
+                        Lat: {{ taller.latitud | number:'1.4-4' }} <br> Lng: {{ taller.longitud | number:'1.4-4' }}
+                    </p>
+                    <p class="text-slate-500 font-medium max-w-sm mt-2">
+                        La IA utilizará esta ubicación para calcular la distancia con los clientes y priorizar tu taller.
+                    </p>
+                </div>
+
+                <button (click)="obtenerUbicacion()" class="w-full py-4 bg-slate-900 hover:bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg flex justify-center items-center gap-2">
+                    <i class="bi bi-crosshair"></i> OBTENER MI UBICACIÓN ACTUAL
+                </button>
+            </div>
+        </div>
+
+        <!-- Columna Lateral -->
+        <div class="space-y-8">
+            <div class="sx-card">
+                <h4 class="text-lg font-black text-slate-800 mb-6 uppercase tracking-tight border-b border-slate-50 pb-4">Capacidad Operativa</h4>
+                
+                <div class="mb-6">
+                    <label class="form-label">Vehículos en simultáneo</label>
+                    <input type="number" [(ngModel)]="taller.capacidad_teorica" class="form-control text-lg font-bold">
+                    <p class="text-[10px] text-slate-400 mt-2 italic">Define cuántos vehículos puede atender el taller al mismo tiempo según su infraestructura física.</p>
+                </div>
+
+                <div class="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-blue-700 uppercase tracking-widest">Estatus Público</span>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input w-10 h-5 cursor-pointer" type="checkbox" 
+                                   [(ngModel)]="taller.esta_activo" 
+                                   (change)="toggleEmergencia()">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-blue-600 mt-2 font-medium">Si desactivas esta opción, tu taller no aparecerá en las búsquedas de clientes para emergencias.</p>
+                </div>
+            </div>
+
+            <button (click)="guardar()" class="btn-sx-primary w-full py-4 text-lg shadow-blue-200">
+                <i class="bi bi-cloud-arrow-up-fill text-xl"></i>
+                <span>Publicar Cambios</span>
+            </button>
+        </div>
+    </div>
+</div>
