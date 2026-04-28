@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://sos-bacnkend.onrender.com'
+    apiUrl: 'https://reminder-garment-mangy.ngrok-free.dev'
 };
