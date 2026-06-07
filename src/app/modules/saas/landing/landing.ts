@@ -45,7 +45,18 @@ export class LandingComponent implements OnInit {
 
   irAEmpresa() {
     if (this.empresaSeleccionada) {
-      this.router.navigate(['/auth/login'], { queryParams: { empresa: this.empresaSeleccionada } });
+      const hostname = window.location.hostname;
+      const port = window.location.port ? `:${window.location.port}` : '';
+      const protocol = window.location.protocol;
+      
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // En entorno local redirigimos a subdominio.localhost
+        window.location.href = `${protocol}//${this.empresaSeleccionada}.localhost${port}/auth/login`;
+      } else {
+        // En producción: eliminamos 'www.' si existe y armamos el subdominio
+        const baseDomain = hostname.replace('www.', '');
+        window.location.href = `${protocol}//${this.empresaSeleccionada}.${baseDomain}${port}/auth/login`;
+      }
     }
   }
 
