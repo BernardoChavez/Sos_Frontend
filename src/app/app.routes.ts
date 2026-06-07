@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from './core/guards/role-guard';
 
 export const routes: Routes = [
   { 
@@ -99,6 +100,19 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
-  { path: '**', redirectTo: 'auth/login' }
+  { 
+    path: '', 
+    loadComponent: () => import('./modules/saas/landing/landing').then(m => m.LandingComponent) 
+  },
+  { 
+    path: 'planes', 
+    loadComponent: () => import('./modules/saas/planes/planes').then(m => m.PlanesComponent) 
+  },
+  {
+    path: 'superadmin',
+    loadComponent: () => import('./modules/saas/superadmin/superadmin').then(m => m.SuperadminComponent),
+    canActivate: [roleGuard],
+    data: { roles: ['super_admin'] }
+  },
+  { path: '**', redirectTo: '' }
 ];

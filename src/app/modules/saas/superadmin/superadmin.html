@@ -1,0 +1,73 @@
+<div class="min-h-screen bg-slate-50 font-['Outfit']">
+  
+  <nav class="bg-slate-900 text-white shadow-xl">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </div>
+        <div>
+          <span class="text-xl font-black tracking-tight italic">GLOBAL ADMIN</span>
+          <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest leading-none">Super Usuario</p>
+        </div>
+      </div>
+      
+      <button (click)="cerrarSesion()" class="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        Cerrar Sesión
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 py-10">
+    <div class="mb-10">
+      <h1 class="text-3xl font-black text-slate-800">Red de Talleres (Tenants)</h1>
+      <p class="text-slate-500">Supervisión global de las suscripciones SaaS y empresas registradas.</p>
+    </div>
+
+    <div class="sx-card">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold text-slate-700">Empresas Activas</h2>
+        <button class="btn-sx-primary py-2 px-4 text-sm">
+          + Nueva Empresa Manual
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="sx-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Empresa</th>
+              <th>Subdominio</th>
+              <th>Plan SaaS</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of empresasMock()">
+              <td class="font-bold text-blue-600">#{{ emp.id }}</td>
+              <td class="font-bold text-slate-800">{{ emp.nombre }}</td>
+              <td><span class="bg-slate-100 text-slate-500 font-mono text-xs px-2 py-1 rounded-md">{{ emp.slug }}.localhost</span></td>
+              <td>
+                <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-xs">
+                  {{ emp.plan }}
+                </span>
+              </td>
+              <td>
+                <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-xs flex items-center w-max gap-1">
+                  <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                  {{ emp.status }}
+                </span>
+              </td>
+              <td>
+                <button class="text-blue-600 hover:text-blue-800 font-bold text-sm">Auditar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>

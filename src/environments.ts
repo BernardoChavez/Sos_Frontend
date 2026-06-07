@@ -1,4 +1,4 @@
 export const environment = {
-    production: true,
-    apiUrl: 'https://reminder-garment-mangy.ngrok-free.dev'
+    production: false,
+    apiUrl: 'http://localhost:8000'
 };

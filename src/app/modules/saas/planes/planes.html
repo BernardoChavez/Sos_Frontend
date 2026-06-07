@@ -1,0 +1,119 @@
+<div class="min-h-screen bg-slate-900 text-slate-50 font-['Outfit']">
+  
+  <nav class="glass-nav sticky top-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center">
+      <button (click)="volver()" class="text-slate-400 hover:text-white flex items-center gap-2 font-semibold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Volver
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    
+    <!-- PASO 1: Elegir Plan -->
+    <div *ngIf="paso() === 1" class="animate-in">
+      <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tight">Elige tu Plan SaaS</h1>
+        <p class="text-slate-400 text-lg">Potencia tu taller con tecnología de punta e IA.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div *ngFor="let plan of planes()" 
+             class="bg-slate-800 border border-slate-700 rounded-3xl p-8 hover:border-blue-500 transition-all duration-300 flex flex-col items-center cursor-pointer hover:-translate-y-2"
+             (click)="seleccionarPlan(plan)">
+          
+          <div class="text-xl font-bold text-blue-400 mb-2 uppercase tracking-widest">{{ plan.nombre }}</div>
+          <div class="text-5xl font-black text-white mb-6">${{ plan.precio }}<span class="text-lg text-slate-500 font-medium">/mes</span></div>
+          
+          <ul class="text-slate-300 space-y-4 mb-8 w-full text-center">
+            <li class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Hasta {{ plan.limite_talleres }} Taller(es)
+            </li>
+            <li class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Hasta {{ plan.limite_tecnicos }} Técnicos
+            </li>
+            <li class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Asignación por Inteligencia Artificial
+            </li>
+          </ul>
+
+          <button class="w-full py-3 bg-slate-700 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors mt-auto">
+            Seleccionar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2: Registro de Empresa -->
+    <div *ngIf="paso() === 2" class="max-w-2xl mx-auto animate-in mt-10">
+      <div class="bg-slate-800 border border-slate-700 rounded-3xl p-10 shadow-2xl">
+        <h2 class="text-3xl font-black mb-2 text-white">Configura tu Entorno</h2>
+        <p class="text-slate-400 mb-8">Plan Seleccionado: <strong class="text-blue-400">{{ planSeleccionado()?.nombre }}</strong></p>
+
+        <div class="space-y-6">
+          <div>
+            <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Nombre de la Empresa</label>
+            <input type="text" [(ngModel)]="empresaData.nombre" (keyup)="generarSlug()"
+                   class="w-full bg-slate-900 border border-slate-700 rounded-xl py-4 px-5 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                   placeholder="Ej: Talleres Compadres">
+          </div>
+
+          <div>
+            <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">URL Personalizada (Subdominio)</label>
+            <div class="flex items-center">
+              <input type="text" [(ngModel)]="empresaData.slug"
+                     class="w-full bg-slate-900 border border-slate-700 rounded-l-xl py-4 px-5 text-blue-400 font-bold focus:border-blue-500 outline-none transition-all"
+                     placeholder="talleres-compadres">
+              <div class="bg-slate-700 border border-l-0 border-slate-700 py-4 px-5 rounded-r-xl text-slate-400 font-semibold">
+                .sosautomotriz.com
+              </div>
+            </div>
+            <p class="text-sm text-slate-500 mt-2">Tus empleados iniciarán sesión en <span class="text-slate-300 font-mono">{{empresaData.slug || '...'}}.localhost:4200</span></p>
+          </div>
+          
+          <div *ngIf="errorMessage()" class="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl text-sm font-semibold">
+            {{ errorMessage() }}
+          </div>
+          
+          <hr class="border-slate-700 my-6">
+          <h3 class="text-xl font-bold text-white mb-4">Datos del Administrador Global</h3>
+
+          <div>
+            <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Nombre Completo</label>
+            <input type="text" [(ngModel)]="empresaData.admin_nombre"
+                   class="w-full bg-slate-900 border border-slate-700 rounded-xl py-4 px-5 text-white focus:border-blue-500 outline-none transition-all"
+                   placeholder="Ej: Juan Pérez">
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Correo Electrónico</label>
+              <input type="email" [(ngModel)]="empresaData.admin_email"
+                     class="w-full bg-slate-900 border border-slate-700 rounded-xl py-4 px-5 text-white focus:border-blue-500 outline-none transition-all"
+                     placeholder="admin@empresa.com">
+            </div>
+            <div>
+              <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Contraseña</label>
+              <input type="password" [(ngModel)]="empresaData.admin_password"
+                     class="w-full bg-slate-900 border border-slate-700 rounded-xl py-4 px-5 text-white focus:border-blue-500 outline-none transition-all"
+                     placeholder="••••••••">
+            </div>
+          </div>
+
+          <button (click)="registrarEmpresa()" [disabled]="isLoading() || !empresaData.nombre || !empresaData.admin_email || !empresaData.admin_password"
+                  class="w-full py-4 mt-8 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+            
+            <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            
+            {{ isLoading() ? 'Aprovisionando base de datos...' : 'Crear mi Plataforma Privada' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>

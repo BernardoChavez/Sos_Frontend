@@ -98,7 +98,9 @@ export class AuthService {
   }
 
   hasPermission(permiso: string): boolean {
-    // Si queremos que el Super Admin sea afectado por la matriz, quitamos el 'if super_admin return true'
+    if (this.currentUser?.rol === 'super_admin' || this.currentUser?.rol === 'admin_empresa') {
+      return true;
+    }
     return this.currentUser?.permisos?.includes(permiso) || false;
   }
 }
