@@ -156,9 +156,15 @@ export class AsistenciaTecnicoComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.incidentesService.actualizarEstadoGestion(this.incidenteId, nuevo).subscribe(res => {
-      this.estadoActual = nuevo;
-      this.cdr.detectChanges();
+    this.incidentesService.actualizarEstadoGestion(this.incidenteId, nuevo).subscribe({
+      next: (res) => {
+        this.estadoActual = nuevo;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al actualizar estado:', err);
+        alert('Hubo un error al actualizar el estado. Revisa la consola.');
+      }
     });
   }
 

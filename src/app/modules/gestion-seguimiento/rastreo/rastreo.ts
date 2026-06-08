@@ -13,7 +13,7 @@ declare var L: any; // Variable global de Leaflet
   imports: [CommonModule],
   template: `
     <div class="p-6 max-w-4xl mx-auto h-full flex flex-col animate-in">
-      <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl flex-1 flex flex-col overflow-hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl flex-1 flex flex-col overflow-y-auto main-scroll-container">
         <header class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-black text-white italic tracking-tighter flex items-center gap-3">
             <span class="w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
@@ -83,6 +83,8 @@ declare var L: any; // Variable global de Leaflet
     #map { z-index: 1; background: #0f172a; }
     .animate-in { animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .main-scroll-container { scrollbar-width: none; -ms-overflow-style: none; }
+    .main-scroll-container::-webkit-scrollbar { display: none; }
   `]
 })
 export class RastreoComponent implements OnInit, OnDestroy, AfterViewInit {

@@ -103,4 +103,8 @@ export class AuthService {
     }
     return this.currentUser?.permisos?.includes(permiso) || false;
   }
+
+  hasRole(rol: string): boolean {
+    return this.currentUser?.rol === rol;
+  }
 }

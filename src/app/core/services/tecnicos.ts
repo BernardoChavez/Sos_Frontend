@@ -20,8 +20,8 @@ export class TecnicosService {
 
   // --- VISTA ADMIN ---
   getTecnicos(tallerId?: number): Observable<any[]> {
-    const url = tallerId ? `${environment.apiUrl}/usuarios/taller/${tallerId}/tecnicos` : this.apiUrl;
-    return this.http.get<any[]>(url);
+    // El backend ahora filtra automáticamente basado en el token, así que llamamos a la ruta principal
+    return this.http.get<any[]>(this.apiUrl);
   }
 
   toggleDisponibilidad(usuarioId: number, disponible: boolean): Observable<any> {

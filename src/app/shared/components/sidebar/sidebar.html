@@ -113,7 +113,18 @@
           <span>Roles y Permisos</span>
         </a>
       </li>
-
+<li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin' || authService.currentUser?.rol === 'admin_empresa'">
+  <a routerLink="/dashboard/admin/empresas" routerLinkActive="active" class="nav-link">
+    <i class="bi bi-building"></i>
+    <span>Empresas</span>
+  </a>
+</li>
+<li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin' || authService.currentUser?.rol === 'admin_empresa'">
+  <a routerLink="/dashboard/admin/suscripciones" routerLinkActive="active" class="nav-link">
+    <i class="bi bi-card-list"></i>
+    <span>Planes y Suscripciones</span>
+  </a>
+</li>
       <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin' || authService.currentUser?.rol === 'admin_empresa'">
         <a routerLink="/dashboard/admin/auditoria" routerLinkActive="active" class="nav-link">
           <i class="bi bi-journal-text"></i>

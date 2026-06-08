@@ -111,7 +111,11 @@ export class UsuariosComponent implements OnInit {
       this.nuevoUsuario = { ...user };
       this.editandoId = user.id;
     } else {
-      this.nuevoUsuario = { nombre: '', email: '', rol: 'cliente', password: '', telefono: '', taller_id: null };
+      let defaultRol = 'cliente';
+      if (this.authService.currentUser?.rol === 'admin_taller') defaultRol = 'tecnico';
+      if (this.authService.currentUser?.rol === 'admin_empresa') defaultRol = 'admin_taller';
+      
+      this.nuevoUsuario = { nombre: '', email: '', rol: defaultRol, password: '', telefono: '', taller_id: null };
       this.editandoId = null;
     }
     this.mostrarModal = true; 

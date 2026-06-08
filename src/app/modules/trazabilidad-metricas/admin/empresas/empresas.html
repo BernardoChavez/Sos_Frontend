@@ -1,0 +1,36 @@
+<div class="max-w-6xl mx-auto p-6 animate-in">
+  <h2 class="text-3xl font-black text-slate-900 mb-6">Empresas</h2>
+
+  <div *ngIf="loading" class="text-slate-500 py-8 text-center">Cargando empresas...</div>
+  <div *ngIf="error" class="text-red-600 bg-red-50 p-4 rounded-lg mb-4">{{ error }}</div>
+
+  <table *ngIf="!loading && !error" class="w-full text-left border-collapse">
+    <thead class="bg-slate-50/50">
+      <tr>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">ID</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Nombre</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Slug</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Suscripción</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Estado</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <tr *ngFor="let e of empresas" class="hover:bg-slate-50 transition-colors">
+        <td class="px-4 py-2 text-slate-700">{{ e.id }}</td>
+        <td class="px-4 py-2 font-semibold text-slate-900">{{ e.nombre }}</td>
+        <td class="px-4 py-2 text-slate-500">{{ e.slug }}</td>
+        <td class="px-4 py-2 text-slate-700">{{ e.suscripcion?.nombre ?? '—' }}</td>
+        <td class="px-4 py-2">
+          <span class="px-2 py-1 rounded-full text-xs font-bold"
+            [ngClass]="{'bg-green-100 text-green-800': e.esta_activa, 'bg-red-100 text-red-800': !e.esta_activa}">
+            {{ e.esta_activa ? 'Activa' : 'Inactiva' }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !error && empresas.length === 0" class="text-slate-400 text-center py-8">
+    No hay empresas registradas.
+  </div>
+</div>

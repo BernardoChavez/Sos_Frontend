@@ -133,7 +133,23 @@ import { Router } from '@angular/router';
               </div>
             }
 
-            <button *ngIf="authService.hasPermission('emergencias.solicitar')"
+            <!-- Vista previa de Audio -->
+            @if (hasAudio) {
+               <div class="flex items-center gap-4 bg-slate-800/50 p-4 rounded-2xl border border-slate-700 mb-4 animate-in">
+                  <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                      <i class="bi bi-mic-fill text-blue-500 text-xl"></i>
+                  </div>
+                  <div class="flex-grow">
+                     <p class="text-white font-bold text-sm mb-0">Reporte de Voz Grabado</p>
+                     <p class="text-blue-400 text-xs mb-0 font-medium">Listo para analizar por IA</p>
+                  </div>
+                  <button (click)="eliminarAudio()" class="w-10 h-10 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors rounded-xl flex items-center justify-center">
+                     <i class="bi bi-trash-fill"></i>
+                  </button>
+               </div>
+            }
+
+            <button 
               (click)="enviarSolicitud()" 
               [disabled]="loading || !selectedVehiculoId || !coords"
               class="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-white font-black rounded-2xl shadow-2xl shadow-blue-900/40 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm">
@@ -183,6 +199,7 @@ export class SolicitarAyudaComponent implements OnInit {
   
   loading = false;
   isRecording = false;
+  hasAudio = false;
   incidenteResult: any = null;
 
   ngOnInit() {
@@ -241,7 +258,8 @@ export class SolicitarAyudaComponent implements OnInit {
         const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
         const audioFile = new File([audioBlob], `reporte_voz_${Date.now()}.webm`, { type: 'audio/webm' });
         this.files.push(audioFile);
-        alert("¡Audio capturado exitosamente!");
+        this.hasAudio = true;
+        this.cdr.detectChanges();
       };
 
       this.mediaRecorder.start();
@@ -262,6 +280,12 @@ export class SolicitarAyudaComponent implements OnInit {
     }
   }
 
+  eliminarAudio() {
+    this.hasAudio = false;
+    this.files = this.files.filter(f => !f.type.includes('audio'));
+    this.cdr.detectChanges();
+  }
+
   eliminarImagen(index: number) {
     this.evidenciasPreview.splice(index, 1);
     this.files.splice(index, 1);
@@ -275,24 +299,27 @@ export class SolicitarAyudaComponent implements OnInit {
     }
     
     this.loading = true;
-    this.incidentesService.solicitarEmergencia({
-      vehiculo_id: Number(this.selectedVehiculoId),
-      latitud: this.coords.lat,
-      longitud: this.coords.lng
-    }).subscribe({
+    const formData = new FormData();
+    formData.append('vehiculo_id', this.selectedVehiculoId.toString());
+    formData.append('latitud', this.coords.lat.toString());
+    formData.append('longitud', this.coords.lng.toString());
+    
+    if (this.files.length > 0) {
+      this.files.forEach(f => {
+        if (f.type.includes('audio')) {
+          formData.append('audio', f);
+        } else {
+          formData.append('foto', f);
+        }
+      });
+    }
+
+    this.incidentesService.solicitarEmergencia(formData).subscribe({
       next: (res) => {
         this.incidenteResult = res;
-        
-        if (this.files.length > 0) {
-          this.files.forEach(f => {
-            const tipo = f.type.includes('audio') ? 'audio' : 'foto';
-            this.incidentesService.subirEvidencia(res.id, tipo, f).subscribe();
-          });
-        }
-        
         this.loading = false;
         this.cdr.detectChanges();
-        this.router.navigate(['/dashboard/cliente/rastreo', res.id]);
+        this.router.navigate(['/dashboard/cliente/rastreo', res.incidente_id]);
       },
       error: (err) => {
         console.error(err);

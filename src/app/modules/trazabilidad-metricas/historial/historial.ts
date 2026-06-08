@@ -286,11 +286,40 @@ export class HistorialComponent implements OnInit {
   }
 
   cargarHistorial() {
-    this.incidentesService.getMisSolicitudes().subscribe(res => {
-      this.historial = res;
-      this.agruparHistorial();
-      this.cdr.detectChanges();
-    });
+    const rol = this.authService.currentUser?.rol;
+    
+    if (rol === 'admin_taller') {
+      const tallerId = this.authService.currentUser?.taller_id;
+      if (tallerId) {
+        this.incidentesService.getHistorialTaller(tallerId).subscribe({
+          next: (res) => {
+            this.historial = res;
+            this.agruparHistorial();
+            this.cdr.detectChanges();
+          },
+          error: (err) => console.error("Error al cargar historial del taller:", err)
+        });
+      }
+    } else if (rol === 'tecnico') {
+      this.incidentesService.getHistorialTecnico().subscribe({
+        next: (res) => {
+          this.historial = res;
+          this.agruparHistorial();
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error("Error al cargar historial del técnico:", err)
+      });
+    } else {
+      // Cliente o Super Admin
+      this.incidentesService.getMisSolicitudes().subscribe({
+        next: (res) => {
+          this.historial = res;
+          this.agruparHistorial();
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error("Error al cargar mis solicitudes:", err)
+      });
+    }
   }
 
   agruparHistorial() {
@@ -324,12 +353,14 @@ export class HistorialComponent implements OnInit {
     this.incidentesService.getReportePDF(id).subscribe(res => {
       this.reporteSeleccionado = res;
       this.mostrarReporte = true;
+      this.cdr.detectChanges();
     });
   }
 
   cerrarReporte() {
     this.mostrarReporte = false;
     this.reporteSeleccionado = null;
+    this.cdr.detectChanges();
   }
 
   imprimirReporte() {

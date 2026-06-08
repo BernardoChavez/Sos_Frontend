@@ -6,7 +6,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
   
   // Asumiremos que el rol guardado en localStorage o desde el AuthService es el activo.
   // En producción, se desencripta el Token JWT.
-  const userStr = localStorage.getItem('user');
+  const userStr = localStorage.getItem('user_data');
   
   if (!userStr) {
     router.navigate(['/auth/login']);

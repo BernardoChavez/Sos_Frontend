@@ -1,0 +1,31 @@
+<div class="max-w-6xl mx-auto p-6 animate-in">
+  <h2 class="text-3xl font-black text-slate-900 mb-6">Planes y Suscripciones</h2>
+
+  <div *ngIf="loading" class="text-slate-500 py-8 text-center">Cargando suscripciones...</div>
+  <div *ngIf="error" class="text-red-600 bg-red-50 p-4 rounded-lg mb-4">{{ error }}</div>
+
+  <table *ngIf="!loading && !error" class="w-full text-left border-collapse">
+    <thead class="bg-slate-50/50">
+      <tr>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">ID</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Nombre</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Precio</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Max. Talleres</th>
+        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Max. Técnicos</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <tr *ngFor="let s of suscripciones" class="hover:bg-slate-50 transition-colors">
+        <td class="px-4 py-2 text-slate-700">{{ s.id }}</td>
+        <td class="px-4 py-2 font-semibold text-slate-900">{{ s.nombre }}</td>
+        <td class="px-4 py-2 text-slate-700">{{ s.precio | currency:'USD' }}</td>
+        <td class="px-4 py-2 text-slate-700">{{ s.max_talleres }}</td>
+        <td class="px-4 py-2 text-slate-700">{{ s.max_tecnicos }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !error && suscripciones.length === 0" class="text-slate-400 text-center py-8">
+    No hay planes registrados.
+  </div>
+</div>

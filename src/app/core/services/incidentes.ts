@@ -11,26 +11,33 @@ export class IncidentesService {
   private baseUrl = environment.apiUrl;
 
   getMisSolicitudes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/incidentes/cliente/mis-solicitudes`);
+    return this.http.get<any[]>(`${this.baseUrl}/emergencias/cliente/mis-solicitudes`);
   }
 
-  solicitarEmergencia(data: { vehiculo_id: number, latitud: number, longitud: number }): Observable<any> {
-    const params = `vehiculo_id=${data.vehiculo_id}&latitud=${data.latitud}&longitud=${data.longitud}`;
-    return this.http.post<any>(`${this.baseUrl}/incidentes/solicitar/?${params}`, {});
+  solicitarEmergencia(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/emergencias/solicitar/`, formData);
   }
 
   subirEvidencia(incidenteId: string, tipo: 'foto' | 'audio', file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<any>(`${this.baseUrl}/incidentes/${incidenteId}/evidencias/?tipo=${tipo}`, formData);
+    return this.http.post<any>(`${this.baseUrl}/emergencias/cliente/${incidenteId}/evidencias/?tipo=${tipo}`, formData);
   }
 
   getMisTrabajosTecnico(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/incidentes/tecnico/mis-trabajos`);
   }
 
+  getHistorialTecnico(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/incidentes/tecnico/historial`);
+  }
+
   getSolicitudesTaller(tallerId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/incidentes/taller/${tallerId}/solicitudes`);
+  }
+
+  getHistorialTaller(tallerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/incidentes/taller/${tallerId}/historial`);
   }
 
   gestionarIncidente(incidenteId: string, accion: 'aceptar' | 'rechazar', tecnicoId?: number): Observable<any> {
@@ -41,19 +48,19 @@ export class IncidentesService {
 
   // --- CICLO 3: GESTIÓN, PAGOS Y RESEÑAS ---
   actualizarEstadoGestion(id: string, estado: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/trazabilidad/bitacora/${id}?estado_nuevo=${estado}`, {});
+    return this.http.post(`${this.baseUrl}/incidentes/${id}/trazabilidad?estado_nuevo=${estado}`, {});
   }
 
   procesarPago(id: string, metodo: string, monto: number): Observable<any> {
-    return this.http.post(`${this.baseUrl}/gestion/pagos/${id}?metodo=${metodo}&monto=${monto}`, {});
+    return this.http.post(`${this.baseUrl}/incidentes/${id}/pagos?metodo=${metodo}&monto=${monto}`, {});
   }
 
   confirmarPagoEfectivo(id: string, montoRecibido: number): Observable<any> {
-    return this.http.post(`${this.baseUrl}/gestion/pagos/${id}/confirmar-efectivo?monto_recibido=${montoRecibido}`, {});
+    return this.http.post(`${this.baseUrl}/incidentes/${id}/pagos/confirmar-efectivo?monto_recibido=${montoRecibido}`, {});
   }
 
   dejarResena(id: string, calificacion: number, comentario: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/incidentes/${id}/calificar?calificacion=${calificacion}&comentario=${comentario}`, {});
+    return this.http.post(`${this.baseUrl}/emergencias/cliente/${id}/calificar?calificacion=${calificacion}&comentario=${comentario}`, {});
   }
 
   // Alias para compatibilidad con componentes viejos
@@ -62,7 +69,7 @@ export class IncidentesService {
   }
 
   getRastreo(incidenteId: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/incidentes/${incidenteId}/rastreo/`);
+    return this.http.get<any>(`${this.baseUrl}/emergencias/cliente/${incidenteId}/rastreo/`);
   }
 
   finalizarServicio(incidenteId: string, diagnostico: string, monto: number): Observable<any> {
@@ -74,6 +81,6 @@ export class IncidentesService {
   }
 
   getReportePDF(id: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/gestion/reporte-pdf/${id}`);
+    return this.http.get<any>(`${this.baseUrl}/incidentes/${id}/reporte`);
   }
 }

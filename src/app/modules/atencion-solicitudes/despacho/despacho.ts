@@ -107,7 +107,7 @@ import { TecnicosService } from '../../../core/services/tecnicos';
                             </div>
 
                             <div class="md:col-span-4">
-                                <button *ngIf="authService.hasPermission('taller.servicio.aceptar')"
+                                <button *ngIf="authService.hasRole('admin_taller') || authService.hasRole('super_admin') || authService.hasPermission('taller.servicio.aceptar')"
                                     (click)="gestionar(s.id, 'aceptar', tecnicoSelect.value)" 
                                     class="w-full h-[64px] bg-slate-900 text-white text-[11px] font-black rounded-2xl hover:bg-blue-600 transition-all uppercase tracking-[0.2em] shadow-xl shadow-slate-200 flex items-center justify-center gap-3">
                                     <i class="bi bi-send-fill text-blue-400"></i>
@@ -116,7 +116,7 @@ import { TecnicosService } from '../../../core/services/tecnicos';
                             </div>
 
                             <div class="md:col-span-2">
-                                <button *ngIf="authService.hasPermission('taller.servicio.rechazar')"
+                                <button *ngIf="authService.hasRole('admin_taller') || authService.hasRole('super_admin') || authService.hasPermission('taller.servicio.rechazar')"
                                     (click)="gestionar(s.id, 'rechazar')" 
                                     class="w-full h-[64px] bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all flex items-center justify-center border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest">
                                     <i class="bi bi-x-circle text-lg"></i>
@@ -302,7 +302,12 @@ export class DespachoComponent implements OnInit {
   getFotoUrl(evidencias: any[]): string {
     if (!evidencias || evidencias.length === 0) return 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400';
     const foto = evidencias.find(e => e.tipo_recurso === 'foto' || e.url_recurso.match(/\.(jpeg|jpg|gif|png)$/));
-    return foto ? foto.url_recurso : 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400';
+    if (!foto) return 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400';
+    if (foto.url_recurso.startsWith('http')) return foto.url_recurso;
+    
+    // Concatenamos con el backend, asegurando que no haya doble barra
+    const urlLimpia = foto.url_recurso.replace(/^\/+/, '');
+    return `http://localhost:8000/${urlLimpia}`;
   }
 
   abrirModalCobro(incidente: any) {

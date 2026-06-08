@@ -63,6 +63,18 @@ export const routes: Routes = [
         loadComponent: () => import('./modules/trazabilidad-metricas/resenas/resenas').then(m => m.ResenasComponent)
       },
       {
+        path: 'admin/empresas',
+        loadComponent: () => import('./modules/trazabilidad-metricas/admin/empresas/empresas').then(m => m.EmpresasComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['super_admin'] }
+      },
+      {
+        path: 'admin/suscripciones',
+        loadComponent: () => import('./modules/trazabilidad-metricas/admin/suscripciones/suscripciones').then(m => m.SuscripcionesComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['super_admin'] }
+      },
+      {
         path: 'taller/tecnicos',
         loadComponent: () => import('./modules/talleres-tecnicos/tecnicos/tecnicos').then(m => m.TecnicosComponent)
       },
@@ -113,6 +125,14 @@ export const routes: Routes = [
     loadComponent: () => import('./modules/saas/superadmin/superadmin').then(m => m.SuperadminComponent),
     canActivate: [roleGuard],
     data: { roles: ['super_admin'] }
+  },
+    {
+    path: 'admin/empresas',
+    redirectTo: 'dashboard/admin/empresas'
+  },
+  {
+    path: 'admin/suscripciones',
+    redirectTo: 'dashboard/admin/suscripciones'
   },
   { path: '**', redirectTo: '' }
 ];
