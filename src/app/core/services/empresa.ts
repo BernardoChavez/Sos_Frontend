@@ -9,7 +9,7 @@ import { environment } from '../../../environments';
 export class EmpresaService {
   private apiUrl = environment.apiUrl + '/empresas';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   registrarEmpresa(empresaData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/`, empresaData);
@@ -22,7 +22,7 @@ export class EmpresaService {
       obs.next([
         { id: 1, nombre: 'Básico', precio: 0, limite_talleres: 1, limite_tecnicos: 5 },
         { id: 2, nombre: 'Pro', precio: 79.99, limite_talleres: 3, limite_tecnicos: 20 },
-        { id: 3, nombre: 'Enterprise', precio: 199.99, limite_talleres: 99, limite_tecnicos: 999 },
+        { id: 3, nombre: 'Enterprise', precio: 199.99, limite_talleres: 10, limite_tecnicos: 20 },
       ]);
       obs.complete();
     });

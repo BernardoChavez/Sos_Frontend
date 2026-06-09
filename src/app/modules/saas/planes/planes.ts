@@ -36,6 +36,11 @@ export class PlanesComponent implements OnInit {
   isLoading = signal(false);
   errorMessage = signal('');
 
+  // Variables de pago
+  metodoPago: 'qr' | 'tarjeta' = 'qr';
+  comprobanteSubido = false;
+  tarjeta: any = { numero: '', nombre: '', exp: '', cvv: '' };
+
   constructor(private empresaService: EmpresaService, private router: Router) {}
 
   ngOnInit() {
@@ -51,7 +56,9 @@ export class PlanesComponent implements OnInit {
   }
   
   volver() {
-    if (this.paso() === 2) {
+    if (this.paso() === 3) {
+      this.paso.set(2);
+    } else if (this.paso() === 2) {
       this.paso.set(1);
     } else {
       this.router.navigate(['/']);
@@ -67,27 +74,30 @@ export class PlanesComponent implements OnInit {
     }
   }
 
-  registrarEmpresa() {
-    if (!this.empresaData.nombre || !this.empresaData.slug || !this.empresaData.admin_email) return;
-    
+  irAPago() {
+    if (!this.empresaData.nombre || !this.empresaData.slug || !this.empresaData.admin_email || !this.empresaData.admin_password) return;
+    this.paso.set(3);
+  }
+
+  confirmarPagoYRegistrar() {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.empresaService.registrarEmpresa(this.empresaData).subscribe({
-      next: (res: any) => {
-        this.isLoading.set(false);
-        // ¡La magia del subdominio!
-        const urlDestino = `http://${res.slug}.localhost:4200/auth/login`;
-        
-        // Creamos un alert amigable y redirigimos
-        alert(`¡Felicidades! Se ha aprovisionado tu servidor privado de base de datos.\nTu nuevo portal es: ${res.slug}.localhost`);
-        
-        window.location.href = urlDestino;
-      },
-      error: (err: any) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err.error?.detail || 'Hubo un error al registrar la empresa.');
-      }
-    });
+    // Simulamos 2 segundos de conexión a la pasarela de pago bancaria
+    setTimeout(() => {
+      this.empresaService.registrarEmpresa(this.empresaData).subscribe({
+        next: (res: any) => {
+          this.isLoading.set(false);
+          const urlDestino = `http://${res.slug}.localhost:4200/auth/login`;
+          alert(`¡Pago exitoso! Se ha aprovisionado tu servidor privado.\nTu portal es: ${res.slug}.localhost`);
+          window.location.href = urlDestino;
+        },
+        error: (err: any) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(err.error?.detail || 'Hubo un error al registrar la empresa.');
+          this.paso.set(2); // Volvemos al formulario si hay error
+        }
+      });
+    }, 2500);
   }
 }

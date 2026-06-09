@@ -104,14 +104,118 @@
             </div>
           </div>
 
-          <button (click)="registrarEmpresa()" [disabled]="isLoading() || !empresaData.nombre || !empresaData.admin_email || !empresaData.admin_password"
+          <button (click)="irAPago()" [disabled]="!empresaData.nombre || !empresaData.admin_email || !empresaData.admin_password"
                   class="w-full py-4 mt-8 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
-            
-            <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            
-            {{ isLoading() ? 'Aprovisionando base de datos...' : 'Crear mi Plataforma Privada' }}
+            Continuar al Pago
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- PASO 3: Pasarela de Pagos SaaS -->
+    <div *ngIf="paso() === 3" class="max-w-2xl mx-auto animate-in mt-10">
+      <div class="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-2xl">
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="font-black text-slate-800 text-2xl uppercase tracking-tighter">Pagar Suscripción</h3>
+            <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-black uppercase tracking-widest">{{ planSeleccionado()?.nombre }}</span>
+        </div>
+
+        <!-- Selector de Métodos (Solo QR y Tarjeta) -->
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <button (click)="metodoPago = 'qr'" 
+                    [class.border-blue-500]="metodoPago === 'qr'"
+                    [class.bg-blue-50]="metodoPago === 'qr'"
+                    class="p-4 border-2 border-slate-100 rounded-2xl flex flex-col items-center gap-2 transition-all hover:border-blue-200 text-slate-700">
+                <i class="bi bi-qr-code text-3xl"></i>
+                <span class="text-[10px] font-black uppercase tracking-widest">QR / Transferencia</span>
+            </button>
+            <button (click)="metodoPago = 'tarjeta'" 
+                    [class.border-amber-500]="metodoPago === 'tarjeta'"
+                    [class.bg-amber-50]="metodoPago === 'tarjeta'"
+                    class="p-4 border-2 border-slate-100 rounded-2xl flex flex-col items-center gap-2 transition-all hover:border-amber-200 text-slate-700">
+                <i class="bi bi-credit-card text-3xl"></i>
+                <span class="text-[10px] font-black uppercase tracking-widest">Tarjeta / POS</span>
+            </button>
+        </div>
+        
+        <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-10 text-center mb-8" *ngIf="metodoPago === 'qr'">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SAAS-{{empresaData.slug}}" 
+                 class="mx-auto mb-6 shadow-2xl rounded-2xl border-4 border-white" alt="QR Pago">
+            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Escanea para Pagar tu Plan</p>
+            <h4 class="text-5xl font-black text-slate-900 italic mb-6">${{ planSeleccionado()?.precio }} <span class="text-lg">/mes</span></h4>
+            
+            <div class="p-4 bg-white border border-slate-200 rounded-xl relative overflow-hidden group cursor-pointer hover:border-blue-500 transition-all text-slate-600">
+                <input type="file" class="absolute inset-0 opacity-0 cursor-pointer z-10" (change)="comprobanteSubido = true">
+                <div class="flex flex-col items-center gap-2" *ngIf="!comprobanteSubido">
+                    <i class="bi bi-cloud-arrow-up text-3xl text-slate-400 group-hover:text-blue-500 transition-colors"></i>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Subir comprobante de pago</span>
+                </div>
+                <div class="flex flex-col items-center gap-2" *ngIf="comprobanteSubido">
+                    <i class="bi bi-file-earmark-check-fill text-3xl text-green-500"></i>
+                    <span class="text-xs font-bold text-green-600 uppercase tracking-widest">Comprobante verificado</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-amber-50 border-2 border-dashed border-amber-200 rounded-[2rem] p-10 text-center mb-8" *ngIf="metodoPago === 'tarjeta'">
+            <!-- Tarjeta Visual -->
+            <div class="w-full h-48 bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 text-left relative overflow-hidden shadow-2xl mb-8 mx-auto max-w-[320px] animate-in">
+                <div class="absolute top-0 right-0 p-6 opacity-20">
+                    <i class="bi bi-bank2 text-6xl text-white"></i>
+                </div>
+                <div class="mb-8">
+                    <i class="bi bi-chip-fill text-4xl text-amber-400"></i>
+                </div>
+                <div class="text-white font-mono text-xl tracking-[0.2em] mb-4">
+                    {{ tarjeta.numero || '**** **** **** ****' }}
+                </div>
+                <div class="flex justify-between items-end">
+                    <div class="text-white/60">
+                        <p class="text-[8px] uppercase tracking-widest">Titular</p>
+                        <p class="text-xs font-bold uppercase tracking-widest">{{ tarjeta.nombre || 'Nombre del Titular' }}</p>
+                    </div>
+                    <div class="text-white/60 text-right">
+                        <p class="text-[8px] uppercase tracking-widest">Exp</p>
+                        <p class="text-xs font-bold uppercase tracking-widest">{{ tarjeta.exp || 'MM/AA' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario Tarjeta -->
+            <div class="space-y-4 text-left text-slate-700">
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest block mb-2">Número de Tarjeta</label>
+                    <input type="text" [(ngModel)]="tarjeta.numero" placeholder="0000 0000 0000 0000" class="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:border-amber-500 outline-none">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-widest block mb-2">Nombre del Titular</label>
+                    <input type="text" [(ngModel)]="tarjeta.nombre" placeholder="Juan Pérez" class="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:border-amber-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black uppercase tracking-widest block mb-2">Vencimiento</label>
+                        <input type="text" [(ngModel)]="tarjeta.exp" placeholder="MM/AA" class="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:border-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase tracking-widest block mb-2">CVV</label>
+                        <input type="password" [(ngModel)]="tarjeta.cvv" placeholder="***" class="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:border-amber-500 outline-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button (click)="confirmarPagoYRegistrar()" 
+                [disabled]="isLoading() || (metodoPago === 'qr' && !comprobanteSubido) || (metodoPago === 'tarjeta' && !tarjeta.numero)"
+                class="w-full py-5 font-black rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                [ngClass]="{
+                    'bg-blue-600 shadow-blue-500/30': metodoPago === 'qr',
+                    'bg-slate-900 shadow-slate-900/30': metodoPago === 'tarjeta'
+                }">
+            <i class="bi bi-shield-check" *ngIf="!isLoading()"></i>
+            <span *ngIf="!isLoading()">PROCESAR PAGO (${{planSeleccionado()?.precio}})</span>
+            <span *ngIf="isLoading()" class="spinner-border spinner-border-sm"></span>
+            <span *ngIf="isLoading()" class="ml-2">Verificando y Creando Servidor...</span>
+        </button>
       </div>
     </div>
 
