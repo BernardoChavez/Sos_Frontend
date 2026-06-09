@@ -40,6 +40,10 @@ export class IncidentesService {
     return this.http.get<any[]>(`${this.baseUrl}/incidentes/taller/${tallerId}/historial`);
   }
 
+  getHistorialEmpresa(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/incidentes/empresa/historial`);
+  }
+
   gestionarIncidente(incidenteId: string, accion: 'aceptar' | 'rechazar', tecnicoId?: number): Observable<any> {
     let url = `${this.baseUrl}/incidentes/${incidenteId}/gestionar/?accion=${accion}`;
     if (tecnicoId) url += `&tecnico_id=${tecnicoId}`;
@@ -78,6 +82,14 @@ export class IncidentesService {
 
   empezarReparacion(incidenteId: string): Observable<any> {
     return this.http.patch<any>(`${this.baseUrl}/incidentes/${incidenteId}/reparar`, {});
+  }
+
+  enviarCotizacion(id: string, monto: number, detalle: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/incidentes/${id}/enviar-cotizacion`, { monto, detalle });
+  }
+
+  responderCotizacion(id: string, aceptada: boolean): Observable<any> {
+    return this.http.post(`${this.baseUrl}/emergencias/cliente/${id}/responder-cotizacion`, { aceptada });
   }
 
   getReportePDF(id: string): Observable<any> {

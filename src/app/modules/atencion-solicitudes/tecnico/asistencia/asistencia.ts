@@ -51,12 +51,44 @@ import { ActivatedRoute, Router } from '@angular/router';
            <i class="bi bi-box-arrow-up-right text-slate-500 text-xs"></i>
         </button>
 
-        <!-- Tracking Toggle -->
+        <!-- Tracking Toggle / Cotización -->
         <div class="flex flex-col gap-4">
-          <button *ngIf="estadoActual === 'aceptado' || estadoActual === 'asignado'" (click)="actualizarEstado('en_camino')"
-                  class="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-lg transition-all uppercase text-xs tracking-widest">
-             <i class="bi bi-truck-flatbed me-2"></i> INICIAR RECORRIDO (EN CAMINO)
-          </button>
+          <!-- Formulario de Cotización -->
+          <div *ngIf="estadoActual === 'aceptado' || estadoActual === 'asignado'" class="bg-slate-800 rounded-2xl p-6 border border-slate-700 animate-in">
+             <h3 class="text-white font-bold text-lg mb-4 text-center">Generar Cotización al Cliente</h3>
+             <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Precio Estimado (Bs.)</label>
+                  <input type="number" [(ngModel)]="cotizacionMonto" class="w-full bg-slate-900 border border-slate-700 rounded-xl text-white p-3 text-xl font-bold focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Detalle de Repuestos / Servicio</label>
+                  <textarea [(ngModel)]="cotizacionDetalle" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-xl text-white p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. Cambio de batería, incluye mano de obra..."></textarea>
+                </div>
+                <button (click)="enviarCotizacion()" [disabled]="!cotizacionDetalle || cotizacionMonto <= 0"
+                        class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-lg transition-all uppercase text-xs tracking-widest disabled:opacity-50">
+                   <i class="bi bi-send-fill me-2"></i> ENVIAR COTIZACIÓN AL CLIENTE
+                </button>
+             </div>
+          </div>
+
+          <!-- PANTALLA DE BLOQUEO MIENTRAS EL CLIENTE DECIDE -->
+          <div *ngIf="estadoActual === 'esperando_aprobacion'" class="bg-slate-800/80 rounded-2xl p-8 border border-slate-700 text-center animate-pulse">
+             <div class="w-16 h-16 mx-auto bg-slate-900 rounded-full flex items-center justify-center mb-4">
+               <i class="bi bi-hourglass-split text-blue-500 text-2xl"></i>
+             </div>
+             <h3 class="text-white font-bold text-lg mb-2">Esperando respuesta del cliente...</h3>
+             <p class="text-slate-400 text-sm">El cliente está revisando tu cotización.</p>
+             <p class="text-slate-500 text-xs mt-4 italic">Serás notificado automáticamente cuando responda.</p>
+          </div>
+
+          <!-- Si el cliente canceló o rechazó -->
+          <div *ngIf="estadoActual === 'cancelado' || estadoActual === 'rechazado'" class="bg-red-900/50 rounded-2xl p-8 border border-red-500/50 text-center">
+             <i class="bi bi-x-circle-fill text-red-500 text-4xl mb-4 block"></i>
+             <h3 class="text-red-100 font-bold text-lg">Servicio Cancelado</h3>
+             <p class="text-red-300 text-sm mt-2">El cliente rechazó la cotización o canceló el auxilio.</p>
+             <button (click)="volverAMisTrabajos()" class="mt-6 px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl shadow transition-all font-bold">Volver a mis trabajos</button>
+          </div>
 
           <button *ngIf="estadoActual === 'en_camino'" (click)="actualizarEstado('en_sitio')"
                   class="w-full py-5 bg-orange-600 hover:bg-orange-700 text-white font-black rounded-2xl shadow-lg transition-all uppercase text-xs tracking-widest">
@@ -117,6 +149,9 @@ export class AsistenciaTecnicoComponent implements OnInit, OnDestroy {
   mostrarFormularioFinal: boolean = false;
   diagnosticoFinal: string = '';
   montoFinal: number = 0;
+  
+  cotizacionMonto: number = 0;
+  cotizacionDetalle: string = '';
 
   ngOnInit() {
     this.incidenteId = this.route.snapshot.params['id'];
@@ -144,6 +179,11 @@ export class AsistenciaTecnicoComponent implements OnInit, OnDestroy {
 
   startLocationUpdates() {
     this.trackingSub = interval(5000).subscribe(() => {
+      // Auto-refrescar estado si estamos esperando la aprobación
+      if (this.estadoActual === 'esperando_aprobacion') {
+         this.cargarDetalles();
+      }
+
       navigator.geolocation.getCurrentPosition(pos => {
         this.tecnicosService.actualizarUbicacion(pos.coords.latitude, pos.coords.longitude).subscribe();
       });
@@ -168,6 +208,21 @@ export class AsistenciaTecnicoComponent implements OnInit, OnDestroy {
     });
   }
 
+  enviarCotizacion() {
+    if (this.cotizacionDetalle && this.cotizacionMonto > 0) {
+      this.incidentesService.enviarCotizacion(this.incidenteId, this.cotizacionMonto, this.cotizacionDetalle).subscribe({
+        next: () => {
+          this.estadoActual = 'esperando_aprobacion';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error enviando cotización:', err);
+          alert('Hubo un error enviando la cotización al cliente.');
+        }
+      });
+    }
+  }
+
   enviarCierre() {
     if (this.diagnosticoFinal && this.montoFinal > 0) {
       this.incidentesService.actualizarEstadoGestion(this.incidenteId, 'finalizado').subscribe(() => {
@@ -182,6 +237,10 @@ export class AsistenciaTecnicoComponent implements OnInit, OnDestroy {
         });
       });
     }
+  }
+
+  volverAMisTrabajos() {
+    this.router.navigate(['/dashboard/tecnico/mis-trabajos']);
   }
 
   ngOnDestroy() {

@@ -20,8 +20,8 @@ import { AuthService } from '../../../core/services/auth';
                 <span class="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em]">Auditoría de Servicios</span>
             </div>
             <h1 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">
-                {{ esAdminTaller ? 'Control de' : 'Historial de' }} 
-                <span class="text-blue-600 underline decoration-4 decoration-blue-100 underline-offset-8">{{ esAdminTaller ? 'Operaciones' : 'Servicios' }}</span>
+                {{ esAdminTaller ? 'Control de' : (esAdminEmpresa ? 'Operaciones de' : 'Historial de') }} 
+                <span class="text-blue-600 underline decoration-4 decoration-blue-100 underline-offset-8">{{ esAdminTaller ? 'Operaciones' : (esAdminEmpresa ? 'Sucursales' : 'Servicios') }}</span>
             </h1>
           </div>
           <button (click)="cargarHistorial()" class="w-12 h-12 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center">
@@ -30,8 +30,8 @@ import { AuthService } from '../../../core/services/auth';
         </div>
       </header>
 
-      <!-- VISTA AGRUPADA (SUPER ADMIN -> CLIENTES | ADMIN TALLER -> TÉCNICOS) -->
-      <div *ngIf="esSuperAdmin || esAdminTaller" class="space-y-4">
+      <!-- VISTA AGRUPADA (SUPER ADMIN -> CLIENTES | ADMIN TALLER -> TÉCNICOS | ADMIN EMPRESA -> TALLERES) -->
+      <div *ngIf="esSuperAdmin || esAdminTaller || esAdminEmpresa" class="space-y-4">
           <div *ngFor="let group of historialAgrupado | keyvalue" class="animate-in">
               <!-- Card del Grupo (Cliente o Técnico) -->
               <div (click)="toggleGrupo(group.key)" 
@@ -41,12 +41,12 @@ import { AuthService } from '../../../core/services/auth';
                   <div class="flex items-center gap-5">
                       <div class="w-14 h-14 rounded-2xl flex items-center justify-center transition-all"
                            [ngClass]="grupoExpandido === group.key ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500'">
-                          <i class="bi" [ngClass]="esAdminTaller ? 'bi-wrench-adjustable' : 'bi-person-lines-fill'"></i>
+                          <i class="bi" [ngClass]="esAdminTaller ? 'bi-wrench-adjustable' : (esAdminEmpresa ? 'bi-building' : 'bi-person-lines-fill')"></i>
                       </div>
                       <div>
                           <h2 class="text-lg font-black text-slate-800 uppercase tracking-tighter mb-0">{{ group.key }}</h2>
                           <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                              {{ $any(group.value).length }} {{ esAdminTaller ? 'TRABAJOS REALIZADOS' : 'ASISTENCIAS REGISTRADAS' }}
+                              {{ $any(group.value).length }} {{ esAdminTaller ? 'TRABAJOS REALIZADOS' : (esAdminEmpresa ? 'INCIDENTES ATENDIDOS' : 'ASISTENCIAS REGISTRADAS') }}
                           </p>
                       </div>
                   </div>
@@ -70,7 +70,7 @@ import { AuthService } from '../../../core/services/auth';
       </div>
 
       <!-- VISTA PLANA (CLIENTE O TÉCNICO INDIVIDUAL) -->
-      <div *ngIf="!esSuperAdmin && !esAdminTaller" class="space-y-6">
+      <div *ngIf="!esSuperAdmin && !esAdminTaller && !esAdminEmpresa" class="space-y-6">
         <div *ngFor="let item of historial">
             <ng-container *ngTemplateOutlet="historyCard; context: { item: item }"></ng-container>
         </div>
@@ -277,6 +277,10 @@ export class HistorialComponent implements OnInit {
     return this.authService.currentUser?.rol === 'admin_taller';
   }
 
+  get esAdminEmpresa(): boolean {
+    return this.authService.currentUser?.rol === 'admin_empresa';
+  }
+
   get esTecnico(): boolean {
     return this.authService.currentUser?.rol === 'tecnico';
   }
@@ -300,6 +304,15 @@ export class HistorialComponent implements OnInit {
           error: (err) => console.error("Error al cargar historial del taller:", err)
         });
       }
+    } else if (rol === 'admin_empresa') {
+      this.incidentesService.getHistorialEmpresa().subscribe({
+        next: (res) => {
+          this.historial = res;
+          this.agruparHistorial();
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error("Error al cargar historial de la empresa:", err)
+      });
     } else if (rol === 'tecnico') {
       this.incidentesService.getHistorialTecnico().subscribe({
         next: (res) => {
@@ -337,6 +350,12 @@ export class HistorialComponent implements OnInit {
         const tech = h.tecnico_nombre || 'Sin Técnico Asignado';
         if (!this.historialAgrupado[tech]) this.historialAgrupado[tech] = [];
         this.historialAgrupado[tech].push(h);
+      });
+    } else if (rol === 'admin_empresa') {
+      this.historial.forEach(h => {
+        const taller = h.taller_nombre || 'Sin Taller Asignado';
+        if (!this.historialAgrupado[taller]) this.historialAgrupado[taller] = [];
+        this.historialAgrupado[taller].push(h);
       });
     }
   }

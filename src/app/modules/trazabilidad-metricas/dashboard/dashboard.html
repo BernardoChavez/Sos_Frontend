@@ -37,6 +37,28 @@
             </div>
         </div>
 
+        <!-- SECCIÓN OFFLINE PENDIENTE (Solo Clientes) -->
+        <div *ngIf="emergenciasPendientes > 0 && authService.currentUser?.rol === 'cliente'" class="mb-12">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-amber-200 border-4 border-white/10 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-6">
+                        <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center shadow-lg">
+                            <i class="bi bi-wifi-off text-3xl animate-pulse"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black italic uppercase tracking-tighter mb-1">Esperando Conexión</h2>
+                            <p class="text-amber-100 font-medium">Tienes <span class="font-black uppercase tracking-widest text-xs">{{ emergenciasPendientes }} SOS GUARDADO(S)</span> localmente.</p>
+                        </div>
+                    </div>
+                    <div class="px-6 py-3 bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl flex items-center gap-3">
+                       <span class="spinner-border spinner-border-sm text-white"></span> 
+                       <span class="text-[10px] font-black uppercase tracking-widest">Sincronizando automáticamente al tener Red...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- SECCIÓN DE EMERGENCIA ACTIVA (Solo Clientes) -->
         <div *ngIf="incidenteActivo" class="mb-12 animate-bounce-slow">
             <div class="bg-gradient-to-r from-red-600 to-rose-700 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-red-200 border-4 border-white/10 relative overflow-hidden">

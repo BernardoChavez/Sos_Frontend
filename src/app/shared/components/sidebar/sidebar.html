@@ -7,6 +7,18 @@
     </div>
   
     <nav class="nav-menu">
+      <!-- SECCIÓN GLOBAL (Solo Super Admin) -->
+      <div class="px-4 mt-2 mb-2 text-[10px] font-black text-blue-500 uppercase tracking-widest" *ngIf="authService.currentUser?.rol === 'super_admin'">
+        GLOBAL SaaS
+      </div>
+      
+      <li class="list-none mb-6" *ngIf="authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/superadmin" class="nav-link bg-gradient-to-r from-slate-800 to-slate-900 text-white font-bold hover:shadow-lg transition-all border border-slate-700 shadow-md">
+          <i class="bi bi-globe2 text-blue-400"></i>
+          <span>Dashboard Operacional</span>
+        </a>
+      </li>
+
       <div class="px-4 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">General</div>
       
       <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
@@ -76,16 +88,18 @@
         </a>
       </li>
 
-      <li class="list-none" *ngIf="authService.currentUser?.rol === 'admin_empresa' || authService.currentUser?.rol === 'admin_taller' || authService.currentUser?.rol === 'super_admin'">
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'admin_taller' || authService.currentUser?.rol === 'super_admin'">
         <a routerLink="/dashboard/taller/configuracion" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-gear-fill"></i>
-        <span>Configurar Taller</span>
-      </a>
+          <i class="bi bi-gear-fill"></i>
+          <span>Configurar Taller</span>
+        </a>
+      </li>
 
-      <a routerLink="/dashboard/taller/historial" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-journal-text"></i>
-        <span>Historial Taller</span>
-      </a>
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'admin_empresa' || authService.currentUser?.rol === 'admin_taller' || authService.currentUser?.rol === 'super_admin'">
+        <a routerLink="/dashboard/taller/historial" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-journal-text"></i>
+          <span>Historial Taller</span>
+        </a>
       </li>
 
       <!-- SECCIÓN ADMINISTRACIÓN DE EMPRESA -->
@@ -107,19 +121,19 @@
         </a>
       </li>
 
-      <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin' || authService.currentUser?.rol === 'admin_empresa'">
+      <li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin'">
         <a routerLink="/dashboard/admin/roles-permisos" routerLinkActive="active" class="nav-link">
           <i class="bi bi-shield-lock"></i>
           <span>Roles y Permisos</span>
         </a>
       </li>
-<li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin' || authService.currentUser?.rol === 'admin_empresa'">
+<li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin'">
   <a routerLink="/dashboard/admin/empresas" routerLinkActive="active" class="nav-link">
     <i class="bi bi-building"></i>
     <span>Empresas</span>
   </a>
 </li>
-<li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin' || authService.currentUser?.rol === 'admin_empresa'">
+<li class="list-none" *ngIf="authService.currentUser?.rol === 'super_admin'">
   <a routerLink="/dashboard/admin/suscripciones" routerLinkActive="active" class="nav-link">
     <i class="bi bi-card-list"></i>
     <span>Planes y Suscripciones</span>

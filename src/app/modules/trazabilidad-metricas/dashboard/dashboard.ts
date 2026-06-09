@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth';
 import { StatsService } from '../../../core/services/stats';
 import { IncidentesService } from '../../../core/services/incidentes';
 import { NotificacionesService } from '../../../core/services/notificaciones';
+import { OfflineSyncService } from '../../../core/services/offline-sync';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,24 +19,36 @@ export class DashboardComponent implements OnInit {
   private statsService = inject(StatsService);
   private incidentesService = inject(IncidentesService);
   private notifService = inject(NotificacionesService);
+  private offlineSync = inject(OfflineSyncService);
   private cdr = inject(ChangeDetectorRef);
   
   resumen: any = null;
   loading = true;
   incidenteActivo: any = null;
   notificaciones: any[] = [];
+  emergenciasPendientes: number = 0;
 
   ngOnInit() {
     if (this.authService.currentUser) {
       this.cargarStats();
       this.verificarEmergenciaActiva();
       this.cargarNotificaciones();
+      this.verificarPendientesOffline();
     } else {
       setTimeout(() => {
         this.cargarStats();
         this.verificarEmergenciaActiva();
         this.cargarNotificaciones();
+        this.verificarPendientesOffline();
       }, 500);
+    }
+  }
+
+  async verificarPendientesOffline() {
+    if (this.authService.currentUser?.rol === 'cliente') {
+      const pendings = await this.offlineSync.getPendingEmergencies();
+      this.emergenciasPendientes = pendings.length;
+      this.cdr.detectChanges();
     }
   }
 
@@ -56,7 +69,7 @@ export class DashboardComponent implements OnInit {
     if (this.authService.currentUser?.rol === 'cliente') {
       this.incidentesService.getMisSolicitudes().subscribe(res => {
         this.incidenteActivo = res.find((s: any) => 
-          ['pendiente', 'asignado', 'en_camino', 'en_reparacion'].includes(s.estado)
+          ['pendiente', 'asignado', 'esperando_aprobacion', 'en_camino', 'en_sitio', 'reparando'].includes(s.estado)
         );
         this.cdr.detectChanges();
       });

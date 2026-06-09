@@ -24,6 +24,34 @@ declare var L: any; // Variable global de Leaflet
           </span>
         </header>
 
+        <!-- Modal Cotización (Pop-Up) -->
+        <div *ngIf="trackingData?.estado === 'esperando_aprobacion'" class="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-6 backdrop-blur-md animate-in">
+           <div class="bg-slate-800 border border-blue-500/50 rounded-[2rem] p-8 max-w-sm w-full shadow-[0_0_50px_-12px_rgba(59,130,246,0.4)]">
+             <div class="w-16 h-16 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+               <i class="bi bi-receipt text-blue-500 text-3xl"></i>
+             </div>
+             <h3 class="text-white font-black text-xl text-center mb-2 tracking-tighter">COTIZACIÓN RECIBIDA</h3>
+             <p class="text-slate-400 text-xs text-center mb-6">El técnico ha enviado el siguiente presupuesto para tu auxilio.</p>
+             
+             <div class="bg-slate-900 rounded-2xl p-5 mb-6 border border-slate-700">
+                <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Detalle del servicio</p>
+                <p class="text-slate-300 text-sm mb-4 italic">"{{trackingData.cotizacion_detalle || 'Revisión y auxilio general'}}"</p>
+                
+                <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Monto Estimado</p>
+                <p class="text-4xl font-black text-green-500">Bs. {{trackingData.cotizacion_monto || trackingData.monto_total || '0.00'}}</p>
+             </div>
+             
+             <div class="flex flex-col gap-3">
+               <button (click)="responderCotizacion(true)" class="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2">
+                 <i class="bi bi-check-circle-fill"></i> ACEPTAR COTIZACIÓN
+               </button>
+               <button (click)="responderCotizacion(false)" class="w-full py-3 bg-slate-800 hover:bg-red-600/90 hover:text-white border border-slate-700 text-slate-400 font-bold rounded-2xl transition-all text-sm flex items-center justify-center gap-2">
+                 <i class="bi bi-x-circle-fill"></i> RECHAZAR Y CANCELAR
+               </button>
+             </div>
+           </div>
+        </div>
+
         <!-- MAPA REAL (Leaflet) -->
         <div id="map" class="flex-1 rounded-[2rem] overflow-hidden mb-6 min-h-[400px] border border-slate-800 shadow-inner"></div>
 
@@ -172,6 +200,25 @@ export class RastreoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   pagar() { this.pagoRealizado = true; }
   descargarComprobante() { alert("Generando PDF..."); }
+
+  responderCotizacion(aceptada: boolean) {
+    this.incidentesService.responderCotizacion(this.incidenteId, aceptada).subscribe({
+      next: (res) => {
+        // optimísticamente actualizamos UI
+        this.trackingData.estado = res.estado || (aceptada ? 'en_camino' : 'cancelado');
+        this.cdr.detectChanges();
+        
+        if (!aceptada) {
+           alert("El servicio fue cancelado.");
+           this.router.navigate(['/dashboard/cliente/mis-solicitudes']);
+        }
+      },
+      error: (err) => {
+        console.error("Error al responder", err);
+        alert("Ocurrió un error enviando la respuesta.");
+      }
+    });
+  }
 
   ngOnDestroy() {
     this.pollSub?.unsubscribe();

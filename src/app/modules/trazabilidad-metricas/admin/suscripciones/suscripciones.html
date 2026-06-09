@@ -1,31 +1,100 @@
 <div class="max-w-6xl mx-auto p-6 animate-in">
-  <h2 class="text-3xl font-black text-slate-900 mb-6">Planes y Suscripciones</h2>
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-3xl font-black text-slate-900">Planes de Suscripción</h2>
+    <button (click)="abrirModalCrear()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+      Crear Plan
+    </button>
+  </div>
 
-  <div *ngIf="loading" class="text-slate-500 py-8 text-center">Cargando suscripciones...</div>
-  <div *ngIf="error" class="text-red-600 bg-red-50 p-4 rounded-lg mb-4">{{ error }}</div>
+  <div *ngIf="loading" class="text-slate-500 py-8 text-center flex flex-col items-center gap-3">
+    <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    <span>Cargando suscripciones...</span>
+  </div>
+  
+  <div *ngIf="error" class="text-red-600 bg-red-50 p-4 rounded-xl border border-red-100 mb-4 font-medium">{{ error }}</div>
 
-  <table *ngIf="!loading && !error" class="w-full text-left border-collapse">
-    <thead class="bg-slate-50/50">
-      <tr>
-        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">ID</th>
-        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Nombre</th>
-        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Precio</th>
-        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Max. Talleres</th>
-        <th class="px-4 py-2 text-xs font-black text-slate-400 uppercase">Max. Técnicos</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-slate-100">
-      <tr *ngFor="let s of suscripciones" class="hover:bg-slate-50 transition-colors">
-        <td class="px-4 py-2 text-slate-700">{{ s.id }}</td>
-        <td class="px-4 py-2 font-semibold text-slate-900">{{ s.nombre }}</td>
-        <td class="px-4 py-2 text-slate-700">{{ s.precio | currency:'USD' }}</td>
-        <td class="px-4 py-2 text-slate-700">{{ s.max_talleres }}</td>
-        <td class="px-4 py-2 text-slate-700">{{ s.max_tecnicos }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden" *ngIf="!loading && !error">
+    <table class="w-full text-left border-collapse">
+      <thead class="bg-slate-50/80 border-b border-slate-100">
+        <tr>
+          <th class="px-5 py-3 text-[11px] font-black text-slate-400 uppercase tracking-wider">ID</th>
+          <th class="px-5 py-3 text-[11px] font-black text-slate-400 uppercase tracking-wider">Nombre del Plan</th>
+          <th class="px-5 py-3 text-[11px] font-black text-slate-400 uppercase tracking-wider">Precio</th>
+          <th class="px-5 py-3 text-[11px] font-black text-slate-400 uppercase tracking-wider">Max Talleres</th>
+          <th class="px-5 py-3 text-[11px] font-black text-slate-400 uppercase tracking-wider">Max Técnicos</th>
+          <th class="px-5 py-3 text-[11px] font-black text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr *ngFor="let s of suscripciones" class="hover:bg-slate-50/50 transition-colors">
+          <td class="px-5 py-4 font-bold text-slate-400">#{{ s.id }}</td>
+          <td class="px-5 py-4 font-bold text-slate-800">{{ s.nombre }}</td>
+          <td class="px-5 py-4 font-black text-emerald-600">{{ s.precio > 0 ? (s.precio | currency:'USD') : 'GRATIS' }}</td>
+          <td class="px-5 py-4 text-slate-600 font-medium">{{ s.max_talleres === 9999 ? 'Ilimitado' : s.max_talleres }}</td>
+          <td class="px-5 py-4 text-slate-600 font-medium">{{ s.max_tecnicos === 9999 ? 'Ilimitado' : s.max_tecnicos }}</td>
+          <td class="px-5 py-4 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <button (click)="abrirModalEditar(s)" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar Plan">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </button>
+              <button (click)="eliminarPlan(s.id)" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar Plan">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="suscripciones.length === 0" class="text-slate-400 text-center py-10 font-medium">
+      No hay planes de suscripción configurados.
+    </div>
+  </div>
+</div>
 
-  <div *ngIf="!loading && !error && suscripciones.length === 0" class="text-slate-400 text-center py-8">
-    No hay planes registrados.
+<!-- Modal Form -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in">
+  <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-100">
+    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+      <h3 class="text-xl font-black text-slate-800">{{ isEditing ? 'Editar Plan' : 'Nuevo Plan SaaS' }}</h3>
+      <button (click)="cerrarModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nombre del Plan</label>
+        <input type="text" [(ngModel)]="planForm.nombre" class="w-full bg-slate-50 border-2 border-slate-100 text-slate-900 rounded-xl py-3 px-4 font-medium outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" placeholder="Ej. Pro, Premium, Básico">
+      </div>
+      
+      <div>
+        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Precio Mensual ($)</label>
+        <input type="number" [(ngModel)]="planForm.precio" class="w-full bg-slate-50 border-2 border-slate-100 text-slate-900 rounded-xl py-3 px-4 font-medium outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" placeholder="0.00">
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Max Talleres</label>
+          <input type="number" [(ngModel)]="planForm.max_talleres" class="w-full bg-slate-50 border-2 border-slate-100 text-slate-900 rounded-xl py-3 px-4 font-medium outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" placeholder="Ej. 1">
+        </div>
+        <div>
+          <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Max Técnicos</label>
+          <input type="number" [(ngModel)]="planForm.max_tecnicos" class="w-full bg-slate-50 border-2 border-slate-100 text-slate-900 rounded-xl py-3 px-4 font-medium outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" placeholder="Ej. 5">
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 italic text-center mt-2">Nota: Para recursos ilimitados usa el valor 9999</p>
+    </div>
+    
+    <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 justify-end">
+      <button (click)="cerrarModal()" class="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors">
+        Cancelar
+      </button>
+      <button (click)="guardarPlan()" [disabled]="guardando || !planForm.nombre" class="px-5 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-blue-500/30 flex items-center gap-2">
+        <svg *ngIf="guardando" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        {{ isEditing ? 'Actualizar Plan' : 'Guardar Plan' }}
+      </button>
+    </div>
   </div>
 </div>

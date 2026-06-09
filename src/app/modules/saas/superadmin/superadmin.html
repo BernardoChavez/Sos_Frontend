@@ -12,62 +12,333 @@
         </div>
       </div>
       
-      <button (click)="cerrarSesion()" class="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-        Cerrar Sesión
-      </button>
+      <div class="flex items-center gap-4">
+        <a href="/dashboard" class="text-sm font-semibold text-blue-400 hover:text-white transition-colors">Volver al Dashboard</a>
+        <button (click)="cerrarSesion()" class="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          Cerrar Sesión
+        </button>
+      </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-6 py-10">
+  <main class="max-w-7xl mx-auto px-6 py-10 space-y-10">
+    <!-- DASHBOARD OPERACIONAL -->
     <div class="mb-10">
-      <h1 class="text-3xl font-black text-slate-800">Red de Talleres (Tenants)</h1>
-      <p class="text-slate-500">Supervisión global de las suscripciones SaaS y empresas registradas.</p>
+      <h1 class="text-3xl font-black text-slate-800 uppercase">DASHBOARD OPERACIONAL</h1>
+      <p class="text-slate-500 font-medium tracking-wide">KPIs y SLAs en Tiempo Real</p>
     </div>
 
-    <div class="sx-card">
-      <div class="flex justify-between items-center mb-6">
+    <!-- CARGANDO DASHBOARD -->
+    <div *ngIf="loadingDashboard()" class="py-12 flex justify-center">
+      <div class="animate-pulse flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-slate-500 font-bold">Cargando métricas globales...</span>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!loadingDashboard()">
+      <!-- ROW 1: KPIs (6 columnas) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+        
+        <!-- KPI 1: Incidentes Activos -->
+        <div class="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between relative overflow-hidden group hover:border-blue-200 transition-colors">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">INCIDENTES ACTIVOS HOY</p>
+          <div class="flex items-end justify-between">
+            <h3 class="text-5xl font-black text-blue-600 tracking-tighter">{{ kpis()?.incidentes_activos.valor }}</h3>
+            <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            </div>
+          </div>
+          <p class="text-emerald-500 font-bold text-sm mt-3">{{ kpis()?.incidentes_activos.variacion }}</p>
+        </div>
+
+        <!-- KPI 1.5: Casos Cancelados -->
+        <div class="bg-rose-50/50 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-rose-100 flex flex-col justify-between relative overflow-hidden group hover:border-rose-300 transition-colors">
+          <p class="text-[11px] font-bold text-rose-800 uppercase tracking-widest mb-2">CASOS CANCELADOS</p>
+          <div class="flex items-end justify-between">
+            <h3 class="text-5xl font-black text-rose-600 tracking-tighter">{{ kpis()?.casos_cancelados?.valor ?? 0 }}</h3>
+            <div class="w-12 h-12 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-500 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+          </div>
+          <p class="text-rose-500 font-bold text-sm mt-3">{{ kpis()?.casos_cancelados?.variacion ?? 'Rechazados o sin atender' }}</p>
+        </div>
+
+        <!-- KPI 2: Técnicos Disponibles -->
+        <div class="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-teal-100 flex flex-col justify-between">
+          <p class="text-[11px] font-bold text-teal-800 uppercase tracking-widest mb-2">TÉCNICOS DISPONIBLES</p>
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1">
+              <h3 class="text-5xl font-black text-teal-600 tracking-tighter">{{ kpis()?.tecnicos_disponibles.disponibles }}</h3>
+              <span class="text-teal-600/60 font-bold">/ Total: {{ kpis()?.tecnicos_disponibles.total }}</span>
+            </div>
+            <div class="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center text-teal-600">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+          </div>
+          <p class="text-teal-600 font-bold text-sm mt-3">{{ kpis()?.tecnicos_disponibles.estado }}</p>
+        </div>
+
+        <!-- KPI 3: Promedio Asignación IA -->
+        <div class="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">PROMEDIO ASIGNACIÓN IA</p>
+          <div class="flex items-end justify-between">
+            <h3 class="text-5xl font-black text-slate-800 tracking-tighter">{{ kpis()?.promedio_asignacion.valor }}<span class="text-3xl text-slate-400 font-bold">{{ kpis()?.promedio_asignacion.unidad }}</span></h3>
+            <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 relative">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center"><svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></div>
+            </div>
+          </div>
+          <p class="text-emerald-500 font-bold text-sm mt-3">SLA: {{ kpis()?.promedio_asignacion.estado_sla }}</p>
+        </div>
+
+        <!-- KPI 3.5: Promedio Llegada -->
+        <div class="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">PROMEDIO LLEGADA TÉC.</p>
+          <div class="flex items-end justify-between">
+            <h3 class="text-5xl font-black text-slate-800 tracking-tighter">{{ kpis()?.promedio_llegada?.valor ?? 0 }}<span class="text-3xl text-slate-400 font-bold">{{ kpis()?.promedio_llegada?.unidad ?? 'm' }}</span></h3>
+            <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 relative">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+            </div>
+          </div>
+          <p class="text-emerald-500 font-bold text-sm mt-3" [ngClass]="{'text-red-500': kpis()?.promedio_llegada?.estado_sla === 'ATRASADO'}">SLA: {{ kpis()?.promedio_llegada?.estado_sla ?? 'CUMPLIDO' }}</p>
+        </div>
+
+        <!-- KPI 4: Cumplimiento SLA Arribo -->
+        <div class="bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">CUMPLIMIENTO SLA ARRIBO</p>
+          <div class="flex items-end justify-between">
+            <h3 class="text-5xl font-black text-blue-600 tracking-tighter">{{ kpis()?.cumplimiento_arribo.texto }}</h3>
+            <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+            </div>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-2 mt-4 relative overflow-hidden">
+            <div class="bg-blue-600 h-2 rounded-full transition-all duration-1000" [style.width.%]="kpis()?.cumplimiento_arribo.porcentaje"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ROW 2: Tablas y Barras (2 columnas 60/40) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        
+        <!-- COLUMNA IZQUIERDA: Últimos Incidentes -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden flex flex-col">
+          <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest">Últimos Incidentes</h2>
+            
+            <div class="flex gap-2 overflow-x-auto pb-1 max-w-full">
+              <button *ngFor="let cat of categoriasDisponibles()" 
+                      (click)="filtrarPorCategoria(cat)"
+                      [ngClass]="categoriaSeleccionada() === cat ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'"
+                      class="px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border transition-all whitespace-nowrap shadow-sm">
+                {{ cat }}
+              </button>
+            </div>
+          </div>
+          <div class="overflow-x-auto flex-1">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">ID</th>
+                  <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Cliente</th>
+                  <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Ubicación</th>
+                  <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Taller Asignado</th>
+                  <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">SLA Estado</th>
+                  <th class="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Tiempo Respuesta</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr *ngFor="let inc of incidentesFiltrados()" class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-6 py-4 font-bold text-slate-500">{{ inc.id }}</td>
+                  <td class="px-6 py-4 font-bold text-slate-800">{{ inc.cliente }}</td>
+                  <td class="px-6 py-4 font-medium text-slate-500">{{ inc.ubicacion }}</td>
+                  <td class="px-6 py-4 font-medium text-slate-600">{{ inc.taller }}</td>
+                  <td class="px-6 py-4 font-bold flex items-center gap-2"
+                    [ngClass]="{'text-blue-600': inc.sla_color === 'blue', 'text-orange-500': inc.sla_color === 'orange', 'text-red-600': inc.sla_color === 'red'}">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+                    {{ inc.sla_estado }}
+                  </td>
+                  <td class="px-6 py-4 font-medium text-slate-700">{{ inc.tiempo_respuesta }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: Flujo SLA de Emergencia -->
+        <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-6 flex flex-col gap-6">
+          <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest pb-2">Flujo de SLA de Emergencia</h2>
+          
+          <div *ngFor="let flow of slaFlow()" class="flex flex-col gap-2">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide">{{ flow.etapa }}</h4>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 relative overflow-hidden">
+              <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-1000" [style.width.%]="flow.porcentaje"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+              <span>Milestone: {{ flow.milestone }}</span>
+              <span>{{ flow.meta }}</span>
+            </div>
+          </div>
+
+          <hr class="border-slate-100 my-2">
+          
+          <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest pb-2">Incidentes por Tipo</h2>
+          <div class="flex flex-col gap-3">
+            <div *ngFor="let tipo of kpis()?.incidentes_por_tipo" class="flex flex-col gap-1">
+               <div class="flex justify-between text-xs font-bold text-slate-700">
+                  <span>{{ tipo.nombre }}</span>
+                  <span class="bg-indigo-50 text-indigo-700 px-2 rounded-full">{{ tipo.cantidad }}</span>
+               </div>
+               <div class="w-full bg-slate-100 rounded-full h-1.5 relative overflow-hidden">
+                  <div class="bg-indigo-500 h-1.5 rounded-full" [style.width.%]="(tipo.cantidad / (kpis()?.incidentes_activos?.valor || 1)) * 100"></div>
+               </div>
+            </div>
+            <div *ngIf="!kpis()?.incidentes_por_tipo?.length" class="text-xs text-slate-400 italic">No hay datos suficientes para graficar.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ROW 3: Mapa -->
+      <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-10">
+         <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest">Zonas con Más Incidentes ({{ categoriaSeleccionada() }})</h2>
+            <div class="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-blue-500">
+               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            </div>
+         </div>
+         <div id="heatmap" class="w-full h-[400px] bg-slate-100 z-0 relative"></div>
+      </div>
+    </ng-container>
+
+    <hr class="border-slate-200 my-10">
+
+    <div>
+      <h1 class="text-3xl font-black text-slate-800">Directorio de Red</h1>
+      <p class="text-slate-500">Supervisión de empresas registradas y modelos de negocio (SaaS).</p>
+    </div>
+
+    <!-- SECCION EMPRESAS -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="flex justify-between items-center p-6 border-b border-slate-100">
         <h2 class="text-lg font-bold text-slate-700">Empresas Activas</h2>
-        <button class="btn-sx-primary py-2 px-4 text-sm">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">
           + Nueva Empresa Manual
         </button>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="sx-table">
-          <thead>
+      <div *ngIf="loadingEmpresas()" class="p-8 text-center text-slate-500 font-medium">
+        <div class="animate-pulse flex flex-col items-center gap-2">
+          <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          Cargando empresas...
+        </div>
+      </div>
+
+      <div *ngIf="errorEmpresas()" class="p-4 m-6 bg-red-50 text-red-600 rounded-lg border border-red-100 font-medium">
+        {{ errorEmpresas() }}
+      </div>
+
+      <div class="overflow-x-auto" *ngIf="!loadingEmpresas() && !errorEmpresas()">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-slate-50 border-b border-slate-100">
             <tr>
-              <th>ID</th>
-              <th>Empresa</th>
-              <th>Subdominio</th>
-              <th>Plan SaaS</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">ID</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Empresa</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Subdominio</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Plan SaaS</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Estado</th>
             </tr>
           </thead>
-          <tbody>
-            <tr *ngFor="let emp of empresasMock()">
-              <td class="font-bold text-blue-600">#{{ emp.id }}</td>
-              <td class="font-bold text-slate-800">{{ emp.nombre }}</td>
-              <td><span class="bg-slate-100 text-slate-500 font-mono text-xs px-2 py-1 rounded-md">{{ emp.slug }}.localhost</span></td>
-              <td>
-                <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-xs">
-                  {{ emp.plan }}
+          <tbody class="divide-y divide-slate-100">
+            <tr *ngFor="let emp of empresas()" class="hover:bg-slate-50 transition-colors">
+              <td class="px-6 py-4 font-bold text-blue-600">#{{ emp.id }}</td>
+              <td class="px-6 py-4 font-bold text-slate-800">{{ emp.nombre }}</td>
+              <td class="px-6 py-4">
+                <span class="bg-slate-100 text-slate-600 font-mono text-xs px-2.5 py-1 rounded-md border border-slate-200">
+                  {{ emp.slug }}.localhost
                 </span>
               </td>
-              <td>
-                <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full text-xs flex items-center w-max gap-1">
-                  <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                  {{ emp.status }}
+              <td class="px-6 py-4">
+                <span class="bg-indigo-50 text-indigo-700 font-bold px-3 py-1 rounded-full text-xs border border-indigo-100">
+                  {{ emp.suscripcion?.nombre ?? '—' }}
                 </span>
               </td>
-              <td>
-                <button class="text-blue-600 hover:text-blue-800 font-bold text-sm">Auditar</button>
+              <td class="px-6 py-4">
+                <span class="font-bold px-3 py-1 rounded-full text-xs flex items-center w-max gap-1.5"
+                  [ngClass]="{'bg-emerald-50 text-emerald-700 border border-emerald-100': emp.esta_activa, 'bg-rose-50 text-rose-700 border border-rose-100': !emp.esta_activa}">
+                  <div class="w-1.5 h-1.5 rounded-full" [ngClass]="{'bg-emerald-500': emp.esta_activa, 'bg-rose-500': !emp.esta_activa}"></div>
+                  {{ emp.esta_activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="empresas().length === 0">
+              <td colspan="5" class="px-6 py-8 text-center text-slate-400 font-medium">
+                No hay empresas registradas en el sistema.
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- SECCION SUSCRIPCIONES -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="flex justify-between items-center p-6 border-b border-slate-100">
+        <h2 class="text-lg font-bold text-slate-700">Planes y Suscripciones</h2>
+        <button class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">
+          + Crear Plan
+        </button>
+      </div>
+
+      <div *ngIf="loadingSuscripciones()" class="p-8 text-center text-slate-500 font-medium">
+        <div class="animate-pulse flex flex-col items-center gap-2">
+          <div class="w-8 h-8 border-4 border-slate-800 border-t-transparent rounded-full animate-spin"></div>
+          Cargando planes...
+        </div>
+      </div>
+
+      <div *ngIf="errorSuscripciones()" class="p-4 m-6 bg-red-50 text-red-600 rounded-lg border border-red-100 font-medium">
+        {{ errorSuscripciones() }}
+      </div>
+
+      <div class="overflow-x-auto" *ngIf="!loadingSuscripciones() && !errorSuscripciones()">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-slate-50 border-b border-slate-100">
+            <tr>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">ID</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Nombre del Plan</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Precio / Mes</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Max Talleres</th>
+              <th class="px-6 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">Max Técnicos</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr *ngFor="let plan of suscripciones()" class="hover:bg-slate-50 transition-colors">
+              <td class="px-6 py-4 font-bold text-slate-400">#{{ plan.id }}</td>
+              <td class="px-6 py-4 font-bold text-slate-800">{{ plan.nombre }}</td>
+              <td class="px-6 py-4 font-black text-emerald-600">
+                {{ plan.precio > 0 ? (plan.precio | currency:'USD') : 'GRATIS' }}
+              </td>
+              <td class="px-6 py-4 text-slate-600 font-medium">
+                {{ plan.max_talleres === 9999 ? 'Ilimitado' : plan.max_talleres }}
+              </td>
+              <td class="px-6 py-4 text-slate-600 font-medium">
+                {{ plan.max_tecnicos === 9999 ? 'Ilimitado' : plan.max_tecnicos }}
+              </td>
+            </tr>
+            <tr *ngIf="suscripciones().length === 0">
+              <td colspan="5" class="px-6 py-8 text-center text-slate-400 font-medium">
+                No hay planes de suscripción configurados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>

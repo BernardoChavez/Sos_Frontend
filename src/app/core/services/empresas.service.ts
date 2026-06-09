@@ -28,4 +28,32 @@ export class EmpresasService {
   getSuscripciones(): Observable<any[]> {
     return this.http.get<any[]>(this.suscripcionesUrl);
   }
+
+  // Create subscription plan
+  crearSuscripcion(data: any): Observable<any> {
+    return this.http.post<any>(this.suscripcionesUrl, data);
+  }
+
+  // Update subscription plan
+  actualizarSuscripcion(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.suscripcionesUrl}${id}`, data);
+  }
+
+  // Delete subscription plan
+  eliminarSuscripcion(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.suscripcionesUrl}${id}`);
+  }
+
+  // --- DASHBOARD METRICS ---
+  getDashboardKpis(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/dashboard/kpis`);
+  }
+
+  getDashboardIncidentesRecientes(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/dashboard/incidentes-recientes`);
+  }
+
+  getDashboardSlaFlow(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/dashboard/sla-flow`);
+  }
 }

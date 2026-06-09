@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IncidentesService } from '../../../core/services/incidentes';
 import { VehiculosService } from '../../../core/services/vehiculos';
 import { AuthService } from '../../../core/services/auth';
+import { OfflineSyncService } from '../../../core/services/offline-sync';
 import { Router } from '@angular/router';
 
 @Component({
@@ -188,6 +189,7 @@ export class SolicitarAyudaComponent implements OnInit {
   private incidentesService = inject(IncidentesService);
   private vehiculosService = inject(VehiculosService);
   public authService = inject(AuthService);
+  private offlineSync = inject(OfflineSyncService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -299,6 +301,23 @@ export class SolicitarAyudaComponent implements OnInit {
     }
     
     this.loading = true;
+    
+    // Si NO hay conexión a internet, guardamos localmente
+    if (!navigator.onLine) {
+      this.offlineSync.saveEmergency({
+        vehiculo_id: this.selectedVehiculoId.toString(),
+        latitud: this.coords.lat.toString(),
+        longitud: this.coords.lng.toString(),
+        archivos: this.files
+      }).then(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+        alert("Sin conexión a internet. Tu emergencia ha sido guardada y se enviará automáticamente en cuanto recuperes la señal.");
+        this.router.navigate(['/dashboard']);
+      });
+      return;
+    }
+
     const formData = new FormData();
     formData.append('vehiculo_id', this.selectedVehiculoId.toString());
     formData.append('latitud', this.coords.lat.toString());
