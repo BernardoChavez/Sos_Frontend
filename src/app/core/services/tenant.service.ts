@@ -13,29 +13,47 @@ export class TenantService {
   }
 
   private detectTenant() {
+    // 1. Truco para Exámenes/Vercel: Leer el taller desde la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryTenant = urlParams.get('taller');
+
+    if (queryTenant) {
+      if (queryTenant === 'global') {
+        localStorage.removeItem('taller_examen');
+        this.currentTenant.set(null);
+        console.log('[TenantService] Forzado a Modo Global SaaS.');
+      } else {
+        localStorage.setItem('taller_examen', queryTenant);
+        this.currentTenant.set(queryTenant);
+        console.log(`[TenantService] Forzado bajo el Tenant: ${queryTenant}`);
+      }
+      return;
+    }
+
+    // 2. Mantener el taller si ya navegamos usando el truco en Vercel
+    const localTenant = localStorage.getItem('taller_examen');
+    if (localTenant) {
+      this.currentTenant.set(localTenant);
+      console.log(`[TenantService] Recuperado Tenant de memoria: ${localTenant}`);
+      return;
+    }
+
+    // 3. Comportamiento normal de subdominios (Localhost o Dominios pagados)
     const hostname = window.location.hostname;
-    
-    // Si estamos en localhost, el subdominio es lo que está antes de .localhost
-    // Si estamos en un dominio real (ej. midominio.com), es lo que está antes de .midominio.com
-    
     const parts = hostname.split('.');
     
-    if (parts.length > 1 && parts[0] !== 'www') {
-      // Hay un subdominio (ej: mi-taller.localhost -> ['mi-taller', 'localhost'])
-      // Excepción para dominios largos: si estamos en production, ajustar lógica.
+    if (parts.length > 1) {
       const subdomain = parts[0];
+      // Añadimos el dominio de vercel para que NO crea que es un taller
+      const reserved = ['app', 'admin', 'www', 'api', 'localhost', 'sos-frontend-phi'];
       
-      // Lista de subdominios "reservados" que no son empresas
-      const reserved = ['app', 'admin', 'www', 'api', 'localhost'];
-      
-      if (!reserved.includes(subdomain)) {
+      if (!reserved.includes(subdomain) && !hostname.includes('vercel.app')) {
         this.currentTenant.set(subdomain);
         console.log(`[TenantService] Operando bajo el Tenant: ${subdomain}`);
         return;
       }
     }
     
-    // Si no hay subdominio, estamos en el dominio global (Landing SaaS)
     console.log('[TenantService] Modo Global SaaS detectado.');
     this.currentTenant.set(null);
   }
